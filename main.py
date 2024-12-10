@@ -209,13 +209,20 @@ class Subcribe():
         # self.osc_client.send_message('/pow', data['pow'])
         sum_pow = sum(data['pow'])
         sum_theta_pow = data['pow'][0] + data['pow'][5]
-        sum_gamma_pow = data['pow'][4] + data['pow'][9]
         sum_alpha_pow = data['pow'][1] + data['pow'][6]
+        sum_beta_low_pow = data['pow'][2] + data['pow'][7]
+        sum_beta_high_pow = data['pow'][3] + data['pow'][8]
+        sum_gamma_pow = data['pow'][4] + data['pow'][9]
         theta_proportion = sum_theta_pow / sum_pow
-        gamma_proportion = sum_gamma_pow / sum_pow
         alpha_proportion = sum_alpha_pow / sum_pow
+        beta_low_proportion = sum_beta_low_pow / sum_pow
+        beta_high_proportion = sum_beta_high_pow / sum_pow
+        gamma_proportion = sum_gamma_pow / sum_pow
+
+        meditation = theta_proportion + alpha_proportion
+        attention = beta_low_proportion + beta_high_proportion + gamma_proportion
         self.osc_client.send_message(
-            '/pow_proportion', [theta_proportion, alpha_proportion, gamma_proportion])
+            '/pow_proportion', [theta_proportion, alpha_proportion, beta_low_proportion, beta_high_proportion, gamma_proportion, meditation, attention])
 
     # callbacks functions
 

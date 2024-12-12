@@ -45,6 +45,7 @@ class Subcribe():
         self.c.bind(new_met_data=self.on_new_met_data)
         self.c.bind(new_pow_data=self.on_new_pow_data)
         self.c.bind(inform_error=self.on_inform_error)
+        self.flag = False
 
     def start(self, streams, headsetId=''):
         """
@@ -178,7 +179,12 @@ class Subcribe():
         For example:  {'signal': 1.0, 'dev': [4, 4, 4, 4, 4, 100], 'batteryPercent': 80, 'time': 1627459265.4463}
         """
         data = kwargs.get('data')
-        print('dev data: {}'.format(data))
+        # print('dev data: {}'.format(data))
+        connection_status = data['dev'][2]
+        if connection_status < 50 and self.flag == True:
+            self.flag = False
+        elif connection_status >= 50 and self.flag == False:
+            self.flag = True
 
     def on_new_met_data(self, *args, **kwargs):
         """
@@ -221,8 +227,12 @@ class Subcribe():
 
         meditation = theta_proportion + alpha_proportion
         attention = beta_low_proportion + beta_high_proportion + gamma_proportion
-        self.osc_client.send_message(
-            '/pow_proportion', [theta_proportion, alpha_proportion, beta_low_proportion, beta_high_proportion, gamma_proportion, meditation, attention])
+        if self.flag:
+            self.osc_client.send_message(
+                '/pow_proportion', [theta_proportion, alpha_proportion, beta_low_proportion, beta_high_proportion, gamma_proportion, meditation, attention])
+        else:
+            self.osc_client.send_message(
+                '/pow_proportion', [0, 0, 0, 0, 0, 0, 0])
 
     # callbacks functions
 
@@ -249,4 +259,4 @@ osc_port = int(dotenv_values('creds.env')['osc_port'])
 client_id = dotenv_values('creds.env')['client_id']
 client_secret = dotenv_values('creds.env')['client_secret']
 sub = Subcribe(client_id, client_secret, osc_ip, osc_port)
-sub.start(['met', 'pow'])
+sub.start(['met', 'pow', 'dev'])
